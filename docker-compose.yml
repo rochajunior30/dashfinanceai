@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: finance-ai
+      POSTGRES_DB: dash-finance-ai
     ports:
       - "5432:5432"
     volumes:

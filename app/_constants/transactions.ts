@@ -2,15 +2,8 @@ import {
   TransactionCategory,
   TransactionPaymentMethod,
   TransactionType,
-  Transaction,
 } from "@prisma/client";
 
-export const getTransactionComentario = (transaction: Transaction): string => {
-  return transaction.comentario;
-};
-
-
-console.log(Transaction)
 export const TRANSACTION_PAYMENT_METHOD_ICONS = {
   [TransactionPaymentMethod.CREDIT_CARD]: "credit-card.svg",
   [TransactionPaymentMethod.DEBIT_CARD]: "debit-card.svg",

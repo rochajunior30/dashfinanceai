@@ -29,6 +29,10 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       TRANSACTION_CATEGORY_LABELS[transaction.category],
   },
   {
+    accessorKey: "comentario",
+    header: "Comentario",
+  },
+  {
     accessorKey: "paymentMethod",
     header: "Método de Pagamento",
     cell: ({ row: { original: transaction } }) =>

@@ -4,25 +4,10 @@ import { LogInIcon } from "lucide-react";
 import { SignInButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { db } from "../_lib/prisma";
 
 const LoginPage = async () => {
   const { userId } = await auth();
-  if (userId) {
-    
-      const newUser = await db.user.create({
-        data: {
-          credits: 0, // Créditos, valor padrão 0
-          name: '', 
-          email: '', 
-          userId: userId
-        },
-      });
-    
-    
-    
-
-    
+  if (userId) {  
     redirect("/");
   }
   return (

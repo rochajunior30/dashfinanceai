@@ -10,8 +10,8 @@ const mulish = Mulish({
 });
 
 export const metadata: Metadata = {
-  title: "Dash Finance AI",
-  description: "Sua plataforma de registro financeiros",
+  title: "Tanotado AI",
+  description: "Sua plataforma para registros financeiros",
 };
 
 export default function RootLayout({
@@ -20,14 +20,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${mulish.className} dark antialiased`}>
+    <html lang="en" className="h-full">
+      <body
+        className={`${mulish.className} dark antialiased flex h-full flex-col bg-gray-900 text-gray-100`}
+      >
         <ClerkProvider
           appearance={{
             baseTheme: dark,
           }}
         >
-          <div className="flex h-full flex-col overflow-hidden">{children}</div>
+          <div className="container mx-auto h-full px-4 sm:px-6 lg:px-8">
+            <div className="flex h-full flex-col">{children}</div>
+          </div>
         </ClerkProvider>
 
         <Toaster />

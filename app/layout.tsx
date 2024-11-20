@@ -12,6 +12,9 @@ const mulish = Mulish({
 export const metadata: Metadata = {
   title: "Tanotado AI",
   description: "Sua plataforma para registros financeiros",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

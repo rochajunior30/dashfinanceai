@@ -16,7 +16,7 @@ datasource db {
 model Transaction {
   id            String                   @id @default(uuid())
   name          String
-  comentario    String                   @default("") // Adicionado um valor padrão vazio
+  comentario    String?                   @default("") // Adicionado um valor padrão vazio
   type          TransactionType
   amount        Decimal                  @db.Decimal(10, 2)
   category      TransactionCategory

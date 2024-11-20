@@ -11,7 +11,7 @@ const Navbar = () => {
     <nav className="flex justify-between border-b border-solid px-8 py-4">
       {/* ESQUERDA */}
       <div className="flex items-center gap-10">
-        <Image src="/logo.svg" width={173} height={39} alt="Finance AI" />
+        <Image src="/logo.svg" width={153} height={39} alt="Tanotado AI" />
         <Link
           href="/"
           className={
@@ -40,7 +40,17 @@ const Navbar = () => {
               : "text-muted-foreground"
           }
         >
-          Assinatura
+          Plano
+        </Link>
+        <Link
+          href="/configuracoes"
+          className={
+            pathname === "/configuracoes"
+              ? "font-bold text-primary"
+              : "text-muted-foreground"
+          }
+        >
+          Configurações
         </Link>
       </div>
       {/* DIREITA */}

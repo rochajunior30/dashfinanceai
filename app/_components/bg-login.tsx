@@ -10,12 +10,14 @@ export default function VideoBackground() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentVideo((prev) =>
-        prev === videos[0] ? videos[1] : videos[0] // Alterna entre os vídeos
+        prev === videos[0] ? videos[1] : videos[0]
       );
     }, switchInterval);
-
-    return () => clearInterval(interval); // Limpa o intervalo quando o componente desmonta
-  }, []);
+  
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [switchInterval]); // Não inclua `videos` porque é constante
+  
 
   return (
     <div className="relative w-full h-full">

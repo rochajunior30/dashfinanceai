@@ -24,7 +24,13 @@ export const TRANSACTION_CATEGORY_LABELS = {
   SALARY: "Salário",
   TRANSPORTATION: "Transporte",
   UTILITY: "Utilidades",
+  PERSONAL: "Pessoal",
+  PROJECTS: "Projetos",
+  TRAVEL: "Viagens",
+  SAO_PAULO: "São Paulo",
+  REIMBURSABLE: "Reenbolsaveis",
 };
+
 
 export const TRANSACTION_PAYMENT_METHOD_LABELS = {
   BANK_TRANSFER: "Transferência Bancária",
@@ -122,5 +128,21 @@ export const TRANSACTION_CATEGORY_OPTIONS = [
   {
     value: TransactionCategory.UTILITY,
     label: TRANSACTION_CATEGORY_LABELS[TransactionCategory.UTILITY],
+  },
+  {
+    value: TransactionCategory.PERSONAL,
+    label: TRANSACTION_CATEGORY_LABELS[TransactionCategory.PERSONAL],
+  },
+  {
+    value: TransactionCategory.PROJECTS,
+    label: TRANSACTION_CATEGORY_LABELS[TransactionCategory.PROJECTS],
+  },
+  {
+    value: TransactionCategory.SAO_PAULO,
+    label: TRANSACTION_CATEGORY_LABELS[TransactionCategory.SAO_PAULO],
+  },
+  {
+    value: TransactionCategory.REIMBURSABLE,
+    label: TRANSACTION_CATEGORY_LABELS[TransactionCategory.REIMBURSABLE],
   },
 ];

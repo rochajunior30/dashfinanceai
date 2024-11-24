@@ -55,6 +55,11 @@ enum TransactionCategory {
   SALARY
   EDUCATION
   OTHER
+  PERSONAL
+  PROJECTS
+  TRAVEL
+  SAO_PAULO
+  REIMBURSABLE
 }
 
 enum TransactionPaymentMethod {

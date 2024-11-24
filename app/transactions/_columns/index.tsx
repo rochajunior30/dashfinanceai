@@ -16,6 +16,19 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
     header: "Nome",
   },
   {
+    accessorKey: "amount",
+    header: "Valor",
+    cell: ({ row: { original: transaction } }) =>
+      new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(Number(transaction.amount)),
+  },
+  {
+    accessorKey: "comentario",
+    header: "Comentario",
+  },
+  {
     accessorKey: "type",
     header: "Tipo",
     cell: ({ row: { original: transaction } }) => (
@@ -27,10 +40,6 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
     header: "Categoria",
     cell: ({ row: { original: transaction } }) =>
       TRANSACTION_CATEGORY_LABELS[transaction.category],
-  },
-  {
-    accessorKey: "comentario",
-    header: "Comentario",
   },
   {
     accessorKey: "paymentMethod",
@@ -47,15 +56,6 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
         month: "long",
         year: "numeric",
       }),
-  },
-  {
-    accessorKey: "amount",
-    header: "Valor",
-    cell: ({ row: { original: transaction } }) =>
-      new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      }).format(Number(transaction.amount)),
   },
   {
     accessorKey: "actions",

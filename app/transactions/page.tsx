@@ -7,12 +7,12 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { ScrollArea } from "../_components/ui/scroll-area";
 import { canUserAddTransaction } from "../_data/can-user-add-transaction";
-import { TransactionCategory } from "@prisma/client"; // Importa o tipo do enum diretamente
+import { TransactionCategory } from "@prisma/client";
 
 interface TransactionsPageProps {
   searchParams: {
     date?: string;
-    category?: TransactionCategory; // Usa o tipo correto do enum
+    category?: TransactionCategory;
   };
 }
 
@@ -38,9 +38,7 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
     };
   }
 
-  const categoryFilter = filterCategory
-    ? { category: filterCategory }
-    : {};
+  const categoryFilter = filterCategory ? { category: filterCategory } : {};
 
   const transactions = await db.transaction.findMany({
     where: {
@@ -64,22 +62,22 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col space-y-6 overflow-hidden p-6">
-        <div className="flex w-full items-center justify-between">
-          <h1 className="text-2xl font-bold">Transações</h1>
-          <div className="flex items-center space-x-4">
-            <form method="get" className="flex items-center space-x-2">
+      <div className="flex flex-col space-y-6 p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-cente justify-between gap-4">
+          <h1 className="text-2xl  font-bold">Transações</h1>
+          <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <form method="get" className="flex flex-col md:flex-row items-center gap-2">
               <input
                 type="date"
                 name="date"
                 defaultValue={filterDate || ""}
-                className="rounded-md bg-gray-950 border-gray-100 p-2 text-gray-100"
+                className="rounded-md bg-gray-600 border-gray-400 p-2 text-primary w-full md:w-auto"
                 placeholder="Selecione uma data"
               />
               <select
                 name="category"
                 defaultValue={filterCategory || ""}
-                className="rounded-md bg-gray-950 border-gray-100 p-2 text-gray-100"
+                className="rounded-md bg-gray-600 border-gray-400 p-2 text-primary w-full md:w-auto"
               >
                 <option value="">Todas as categorias</option>
                 {categories.map((c) => (
@@ -90,12 +88,14 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
               </select>
               <button
                 type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-full font-bold hover:bg-inherit"
+                className="bg-primary text-white px-4 py-2 rounded-full font-bold hover:bg-inherit w-full md:w-auto"
               >
                 Filtrar
               </button>
             </form>
-            <AddTransactionButton userCanAddTransaction={userCanAddTransaction} />
+            <div className="flex justify-center md:justify-end w-full md:w-auto">
+              <AddTransactionButton userCanAddTransaction={userCanAddTransaction} />
+            </div>
           </div>
         </div>
         <ScrollArea className="h-full">

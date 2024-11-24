@@ -5,6 +5,7 @@ import {
   WalletIcon,
 } from "lucide-react";
 import SummaryCard from "./summary-card";
+import SummaryCardBt from "./summary-card-sem-bt";
 
 interface SummaryCards {
   month: string;
@@ -23,31 +24,31 @@ const SummaryCards = async ({
   userCanAddTransaction,
 }: SummaryCards) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* PRIMEIRO CARD */}
-
       <SummaryCard
-        icon={<WalletIcon size={16} />}
+        icon={<WalletIcon size={25} />}
         title="Saldo"
         amount={balance}
         size="large"
         userCanAddTransaction={userCanAddTransaction}
+        textColor={balance < 0 ? "text-red-500" : "text-green-500"}
       />
 
       {/* OUTROS CARDS */}
-      <div className="grid grid-cols-3 gap-6">
-        <SummaryCard
-          icon={<PiggyBankIcon size={16} />}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+        <SummaryCardBt
+          icon={<PiggyBankIcon size={20} />}
           title="Investido"
           amount={investmentsTotal}
         />
-        <SummaryCard
-          icon={<TrendingUpIcon size={16} className="text-primary" />}
+        <SummaryCardBt
+          icon={<TrendingUpIcon size={20} />}
           title="Receita"
           amount={depositsTotal}
         />
-        <SummaryCard
-          icon={<TrendingDownIcon size={16} className="text-red-500" />}
+        <SummaryCardBt
+          icon={<TrendingDownIcon size={20} className="text-red-500" />}
           title="Despesas"
           amount={expensesTotal}
         />

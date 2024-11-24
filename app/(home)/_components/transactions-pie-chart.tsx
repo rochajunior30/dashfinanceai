@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Pie, PieChart } from "recharts";
 
 import { Card, CardContent } from "@/app/_components/ui/card";
@@ -42,6 +43,14 @@ const TransactionsPieChart = ({
   expensesTotal,
   typesPercentage,
 }: TransactionsPieChartProps) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return <div className="h-[200px] md:h-[250px] bg-gray-100"></div>;
+
   const chartData = [
     {
       type: TransactionType.DEPOSIT,
@@ -59,14 +68,15 @@ const TransactionsPieChart = ({
       fill: "#FFFFFF",
     },
   ];
+
   return (
-    <Card className="flex flex-col p-6">
-      <CardContent className="flex-1 pb-0">
+    <Card className="flex flex-col p-4 md:p-6">
+      <CardContent className="flex flex-col items-center pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square max-h-[200px] md:max-h-[250px] w-full"
         >
-          <PieChart>
+          <PieChart width={200} height={200}>
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
@@ -75,12 +85,13 @@ const TransactionsPieChart = ({
               data={chartData}
               dataKey="amount"
               nameKey="type"
-              innerRadius={60}
+              innerRadius={50}
+              outerRadius={80}
             />
           </PieChart>
         </ChartContainer>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6 w-full md:w-auto">
           <PercentageItem
             icon={<TrendingUpIcon size={16} className="text-primary" />}
             title="Receita"

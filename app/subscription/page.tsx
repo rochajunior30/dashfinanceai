@@ -70,7 +70,11 @@ const SubscriptionPage = async () => {
               </div>
               <div className="flex items-center gap-2">
                 <CheckIcon className="text-primary" />
-                <p>Relatórios de IA</p>
+                <p>Lançamentos por fotos</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckIcon className="text-primary" />
+                <p>Insights financeiros</p>
               </div>
               <AcquirePlanButton />
             </CardContent>

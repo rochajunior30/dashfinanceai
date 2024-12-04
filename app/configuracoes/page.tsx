@@ -1,9 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
 import Navbar from "../_components/navbar";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-
-
-
+import SettingsDialog from "./_components/settings-dialog";
+import SettingsTable from "./_components/settings-table";
 
 const SettingsPage = async () => {
   const { userId } = await auth();
@@ -11,13 +10,17 @@ const SettingsPage = async () => {
     redirect("/login");
   }
 
-
   return (
     <>
-      <Navbar/>
-      <div className="space-y-6 p-6">
-      <h1 className="text-2xl text-center font-bold">Configurações</h1>
+      {/* Navbar está incluído aqui */}
+      <Navbar />
+      <div className="flex flex-col items-center space-y-6 p-6">
+        <h1 className="text-2xl font-bold">Configurações do Whatsapp</h1>
+        <SettingsDialog />
+        <SettingsTable />
       </div>
+      
+      
     </>
   );
 };

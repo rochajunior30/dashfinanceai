@@ -27,16 +27,6 @@ model Transaction {
   userId        String
 }
 
-model User {
-  id            String                   @id @default(uuid())
-  userId        String
-  name          String
-  whatsapp      String                   @default("") // Adicionado um valor padrão vazio
-  email         String
-  credits       Decimal                  @db.Decimal(10, 2)
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
-}
 
 
 enum TransactionType {
@@ -71,3 +61,24 @@ enum TransactionPaymentMethod {
   PIX
   OTHER
 }
+
+
+model APIConfiguration {
+  id            String          @id @default(uuid())
+  userId        String          // Relaciona o usuário que configurou a API
+  type          APIType         // Enum para identificar o tipo de API
+  url           String          // URL fornecida pelo usuário
+  token         String          // Token fornecido pelo usuário
+  senha         String?         // Senha fornecida, apenas para API Oficial
+  apiId         String?         // ID fornecido, apenas para API Oficial
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+enum APIType {
+  API_OFICIAL
+  API_EVOLUTION
+  N8N
+}
+
+

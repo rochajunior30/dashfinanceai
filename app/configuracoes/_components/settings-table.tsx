@@ -9,7 +9,8 @@ const SettingsTable = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [userId, setUserID] = useState<string | undefined>();
     const [qrCode, setQrCode] = useState<string | null>(null); // Para armazenar o QR Code gerado
-    const [isConectedEvo, setIsConectedEvo] = useState<string | null>(null); // Para armazenar o QR Code gerado
+    const [isCheckingInstance, setIsCheckingInstance] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | null>(null);
 
     // Buscar configurações
     const fetchConfigs = async () => {
@@ -28,35 +29,40 @@ const SettingsTable = () => {
         }
     };
 
-    // Deletar configuração
-    const deleteConfig = async (id: string) => {
-        try {
-            const response = await fetch(`/api/api-configurations?id=${id}`, {
-                method: "DELETE",
-            });
+    // Verificar conexão com a instância
+    const checkInstance = async (config: any) => {
+        if (!config || config.type !== "API_EVOLUTION") return;
 
-            if (!response.ok) {
-                throw new Error("Erro ao deletar configuração.");
+        setIsCheckingInstance(true);
+        try {
+            const response = await fetch(`${config.url}instance/connect/${config.userId}`,{headers: {'apiKey': config.token}});
+            if (response.status === 404) {
+                setConnectionStatus("disconnected");
+                return;
             }
 
-            toast.success("Configuração removida com sucesso!");
-            fetchConfigs(); // Recarregar os dados
+            if (response.ok) {
+                const result = await response.json();
+                if (result?.instance?.state === "open") {
+                    setConnectionStatus("connected");
+                } else {
+                    setConnectionStatus("disconnected");
+                }
+            } else {
+                setConnectionStatus("disconnected");
+            }
         } catch (error) {
-            toast.error("Erro ao deletar configuração.");
-            console.error(error);
+            console.error("Erro ao verificar conexão da instância:", error);
+            setConnectionStatus("disconnected");
+        } finally {
+            setIsCheckingInstance(false);
         }
-    };
-
-    // Abrir modal de edição
-    const editConfig = (config: any) => {
-        console.log("Editar configuração:", config);
-        // Lógica para abrir um modal de edição (a implementar)
     };
 
     // Gerar QR-Code
     const generateQRCode = async (config: any) => {
         try {
-            const bodys = {
+            const body = {
                 instanceName: `${userId}`,
                 qrcode: true, // (Opcional)
                 integration: "WHATSAPP-BAILEYS",
@@ -68,7 +74,7 @@ const SettingsTable = () => {
                     "Content-Type": "application/json",
                     apiKey: `${config.token}`, // Autenticação com o token
                 },
-                body: JSON.stringify(bodys),
+                body: JSON.stringify(body),
             });
 
             if (!response.ok) {
@@ -89,23 +95,18 @@ const SettingsTable = () => {
             console.error(error);
         }
     };
-    const checkInstance = async (config: any) => {
-        try {
-            const response = await fetch(`${config.url}instance/connect/${userId}`);
-            if (!response.ok) {
-                throw new Error("Erro ao verificar conexão instancia.");
-            }
-            const result = await response.json();
-            setIsConectedEvo(result)
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
+    // Buscar configurações ao carregar a página
     useEffect(() => {
         fetchConfigs();
-        checkInstance(configs)
     }, []);
+
+    // Verificar instância após `configs` ser atualizado
+    useEffect(() => {
+        if (configs) {
+            checkInstance(configs);
+        }
+    }, [configs]);
 
     return (
         <div className="space-y-6">
@@ -113,56 +114,61 @@ const SettingsTable = () => {
 
             {isLoading ? (
                 <p>Carregando...</p>
-            ) : configs ? (
-                <table className="table-auto w-full border-collapse border border-gray-700">
-                    <thead>
-                        <tr className="bg-gray-800 text-white">
-                            <th className="border border-gray-700 p-2">Tipo</th>
-                            <th className="border border-gray-700 p-2">URL</th>
-                            <th className="border border-gray-700 p-2">Token</th>
-                            <th className="border border-gray-700 p-2">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr key={configs.id} className="text-center">
-                            <td className="border border-gray-700 p-2">{configs.type}</td>
-                            <td className="border border-gray-700 p-2">{configs.url}</td>
-                            <td className="border border-gray-700 p-2">{configs.token}</td>
-                            <td className="border border-gray-700 p-2 space-x-2">
-                                {configs.type === "API_EVOLUTION" ? (
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => generateQRCode(configs)}
-                                    >
-                                        Gerar QR-Code
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => editConfig(configs)}
-                                    >
-                                        Editar
-                                    </Button>
-                                )}
-                                <Button
-                                    variant="destructive"
-                                    onClick={() => deleteConfig(configs.id)}
-                                >
-                                    Deletar
-                                </Button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            ) : isCheckingInstance ? (
+                <p>Verificando conexão...</p>
+            ) : connectionStatus === "connected" ? (
+                <div className="flex items-center space-x-2 mt-4">
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                    <p className="text-lg font-semibold">Você está conectado!</p>
+                </div>
             ) : (
-                <p>Nenhuma configuração cadastrada.</p>
-            )}
+                <div>
+                    {configs ? (
+                        <table className="table-auto w-full border-collapse border border-gray-700">
+                            <thead>
+                                <tr className="bg-gray-800 text-white">
+                                    <th className="border border-gray-700 p-2">Tipo</th>
+                                    <th className="border border-gray-700 p-2">URL</th>
+                                    <th className="border border-gray-700 p-2">Token</th>
+                                    <th className="border border-gray-700 p-2">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr key={configs.id} className="text-center">
+                                    <td className="border border-gray-700 p-2">{configs.type}</td>
+                                    <td className="border border-gray-700 p-2">{configs.url}</td>
+                                    <td className="border border-gray-700 p-2">{configs.token}</td>
+                                    <td className="border border-gray-700 p-2 space-x-2">
+                                        {configs.type === "API_EVOLUTION" ? (
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => generateQRCode(configs)}
+                                            >
+                                                Gerar QR-Code
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => console.log("Editar configuração:", configs)}
+                                            >
+                                                Editar
+                                            </Button>
+                                        )}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p>Nenhuma configuração cadastrada.</p>
+                    )}
 
-            {/* Exibir QR Code */}
-            {qrCode && (
-                <div className="mt-6 flex flex-col items-center">
-                    <h3 className="text-lg font-bold mb-4">QR Code Gerado</h3>
-                    <img src={qrCode} alt="QR Code" className="border border-gray-700 rounded-md" />
+                    {/* Exibir QR Code */}
+                    {qrCode && (
+                        <div className="mt-6 flex flex-col items-center">
+                            <h3 className="text-lg font-bold mb-4">QR Code Gerado</h3>
+                            <img src={qrCode} alt="QR Code" className="border border-gray-700 rounded-md" />
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -29,25 +29,32 @@ const SettingsTable = () => {
         }
     };
 
-    // Verificar conexão com a instância
     const checkInstance = async (config: any) => {
         if (!config || config.type !== "API_EVOLUTION") return;
-
+    
         setIsCheckingInstance(true);
         try {
-            const response = await fetch(`${config.url}instance/connect/${config.userId}`,{headers: {'apiKey': config.token}});
+            const response = await fetch("/api/evo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    action: "checkInstance",
+                    url: config.url,
+                    token: config.token,
+                    userId: config.userId,
+                }),
+            });
+    
             if (response.status === 404) {
                 setConnectionStatus("disconnected");
                 return;
             }
-
-            if (response.ok) {
-                const result = await response.json();
-                if (result?.instance?.state === "open") {
-                    setConnectionStatus("connected");
-                } else {
-                    setConnectionStatus("disconnected");
-                }
+    
+            const result = await response.json();
+            if (result?.instance?.state === "open") {
+                setConnectionStatus("connected");
             } else {
                 setConnectionStatus("disconnected");
             }
@@ -58,32 +65,29 @@ const SettingsTable = () => {
             setIsCheckingInstance(false);
         }
     };
-
-    // Gerar QR-Code
+    
     const generateQRCode = async (config: any) => {
         try {
-            const body = {
-                instanceName: `${userId}`,
-                qrcode: true, // (Opcional)
-                integration: "WHATSAPP-BAILEYS",
-            };
-
-            const response = await fetch(`${config.url}instance/create`, {
+            const response = await fetch("/api/evo", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    apiKey: `${config.token}`, // Autenticação com o token
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify(body),
+                body: JSON.stringify({
+                    action: "generateQrCode",
+                    url: config.url,
+                    token: config.token,
+                    userId,
+                }),
             });
-
+    
             if (!response.ok) {
                 throw new Error("Erro ao gerar QR-Code.");
             }
-
+    
             const result = await response.json();
             console.log("QR-Code gerado:", result.qrcode);
-
+    
             if (result.qrcode?.base64) {
                 setQrCode(result.qrcode.base64); // Atualizar o QR Code no estado
                 toast.success("QR-Code gerado com sucesso!");
@@ -95,6 +99,7 @@ const SettingsTable = () => {
             console.error(error);
         }
     };
+    
 
     // Buscar configurações ao carregar a página
     useEffect(() => {
@@ -110,7 +115,7 @@ const SettingsTable = () => {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-xl font-bold">Configurações Cadastradas</h2>
+            
 
             {isLoading ? (
                 <p>Carregando...</p>
@@ -137,7 +142,7 @@ const SettingsTable = () => {
                                 <tr key={configs.id} className="text-center">
                                     <td className="border border-gray-700 p-2">{configs.type}</td>
                                     <td className="border border-gray-700 p-2">{configs.url}</td>
-                                    <td className="border border-gray-700 p-2">{configs.token}</td>
+                                    <td className="border border-gray-700 p-2">{configs.token ? `****${configs.token.slice(-10)}` : ""}</td>
                                     <td className="border border-gray-700 p-2 space-x-2">
                                         {configs.type === "API_EVOLUTION" ? (
                                             <Button
@@ -165,7 +170,7 @@ const SettingsTable = () => {
                     {/* Exibir QR Code */}
                     {qrCode && (
                         <div className="mt-6 flex flex-col items-center">
-                            <h3 className="text-lg font-bold mb-4">QR Code Gerado</h3>
+                            <h3 className="text-lg font-bold mb-4">Leia o QR Code com seu whatsapp business!</h3>
                             <img src={qrCode} alt="QR Code" className="border border-gray-700 rounded-md" />
                         </div>
                     )}

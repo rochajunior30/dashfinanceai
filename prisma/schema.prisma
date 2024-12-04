@@ -68,6 +68,7 @@ model APIConfiguration {
   userId        String          // Relaciona o usuário que configurou a API
   type          APIType         // Enum para identificar o tipo de API
   url           String          // URL fornecida pelo usuário
+  numeroWhatsapp String          // URL fornecida pelo usuário
   token         String          // Token fornecido pelo usuário
   senha         String?         // Senha fornecida, apenas para API Oficial
   apiId         String?         // ID fornecido, apenas para API Oficial

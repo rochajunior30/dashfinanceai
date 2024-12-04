@@ -21,6 +21,7 @@ const SettingsDialog = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [formData, setFormData] = useState<any>({
     url: "",
+    numeroWhatsapp: "",
     token: "",
     senha: "",
     id: "",
@@ -43,6 +44,7 @@ const SettingsDialog = () => {
         type: selectedOption,
         url: formData.url,
         token: formData.token,
+        numeroWhatsapp: formData.numeroWhatsapp,
       };
 
       if (selectedOption === "API_OFICIAL") {
@@ -102,6 +104,14 @@ const SettingsDialog = () => {
               required
             />
             <Input
+              name="numeroWhatsapp"
+              placeholder="Unico Whatsapp"
+              value={formData.numeroWhatsapp}
+              onChange={handleInputChange}
+              className="input-field"
+              required
+            />
+            <Input
               name="senha"
               placeholder="Senha"
               type="password"
@@ -139,6 +149,13 @@ const SettingsDialog = () => {
               onChange={handleInputChange}
               className="input-field"
               required
+            />
+            <Input
+              name="numeroWhatsapp"
+              placeholder="Whatsapp do Responsável"
+              value={formData.numeroWhatsapp}
+              onChange={handleInputChange}
+              className="input-field"
             />
           </>
         );

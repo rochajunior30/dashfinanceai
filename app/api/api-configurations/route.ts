@@ -8,67 +8,55 @@ const APIConfigSchema = z.object({
   type: z.enum(["API_OFICIAL", "API_EVOLUTION", "N8N"]),
   url: z.string().url(),
   token: z.string(),
+  numeroWhatsapp: z.string().optional(),
   senha: z.string().optional(),
   apiId: z.string().optional(),
 });
 
 // POST: Criar ou atualizar configuração
 export async function POST(request: Request) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const parsed = APIConfigSchema.safeParse(body);
-
-    if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid data', details: parsed.error.errors }, { status: 400 });
-    }
-
-    const { type, url, token, senha, apiId } = parsed.data;
-
-    // Verificar se já existe uma configuração para o usuário
-    const existingConfig = await db.APIConfiguration.findFirst({
-      where: { userId },
-    });
-
-    if (existingConfig) {
-      // Atualizar configuração existente
-      const updatedConfig = await db.APIConfiguration.update({
-        where: { id: existingConfig.id },
-        data: {
-          type,
-          url,
-          token,
-          senha: type === "API_OFICIAL" ? senha : null,
-          apiId: type === "API_OFICIAL" ? apiId : null,
-        },
-      });
-
-      return NextResponse.json({ message: 'Configuração atualizada com sucesso!', config: updatedConfig }, { status: 200 });
-    } else {
-      // Criar nova configuração
+    try {
+      const { userId } = await auth();
+  
+      if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+  
+      const body = await request.json();
+      const parsed = APIConfigSchema.safeParse(body);
+  
+      if (!parsed.success) {
+        return NextResponse.json({ error: 'Invalid data', details: parsed.error.errors }, { status: 400 });
+      }
+  
+      const { type, url, numeroWhatsapp, token, senha, apiId } = parsed.data;
+  
+      // Criar uma nova configuração associada ao userId
       const newConfig = await db.APIConfiguration.create({
         data: {
           userId,
           type,
           url,
+          numeroWhatsapp: type === "API_EVOLUTION" ? numeroWhatsapp : null,
           token,
           senha: type === "API_OFICIAL" ? senha : null,
           apiId: type === "API_OFICIAL" ? apiId : null,
         },
       });
-
-      return NextResponse.json({ message: 'Configuração criada com sucesso!', config: newConfig }, { status: 201 });
+  
+      return NextResponse.json(
+        { message: 'Configuração criada com sucesso!', config: newConfig },
+        { status: 201 }
+      );
+    } catch (error) {
+      console.error('Erro ao salvar configuração:', error);
+      return NextResponse.json(
+        { error: 'Internal Server Error', details: error.message },
+        { status: 500 }
+      );
     }
-  } catch (error) {
-    console.error('Erro ao salvar configuração:', error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
-}
+  
 
 // GET: Obter configuração do usuário
 export async function GET() {

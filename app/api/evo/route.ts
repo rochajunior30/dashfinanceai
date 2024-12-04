@@ -13,10 +13,12 @@ export async function POST(request: Request) {
     try {
         let endpoint = "";
         let body = null;
+        let method = null;
 
         switch (action) {
             case "checkInstance":
                 endpoint = `${url}instance/connect/${userId}`;
+                method = "GET";
                 break;
 
             case "generateQrCode":
@@ -26,6 +28,12 @@ export async function POST(request: Request) {
                     qrcode: true,
                     integration: "WHATSAPP-BAILEYS",
                 };
+                method = "POST";
+                break;
+
+            case "deleteInstance":
+                endpoint = `${url}instance/delete/${userId}`;
+                method = "DELETE";
                 break;
 
             default:
@@ -36,10 +44,10 @@ export async function POST(request: Request) {
         }
 
         const response = await fetch(endpoint, {
-            method: body ? "POST" : "GET",
+            method: method,
             headers: {
                 "Content-Type": "application/json",
-                apiKey: token,
+                apikey: token,
             },
             body: body ? JSON.stringify(body) : null,
         });

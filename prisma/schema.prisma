@@ -63,7 +63,7 @@ enum TransactionPaymentMethod {
 }
 
 
-model APIConfiguration {
+model apiConfiguration {
   id            String          @id @default(uuid())
   userId        String          // Relaciona o usuário que configurou a API
   type          APIType         // Enum para identificar o tipo de API
@@ -75,7 +75,7 @@ model APIConfiguration {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
-  @@map("APIConfiguration")
+  @@map("apiConfiguration")
 }
 
 enum APIType {

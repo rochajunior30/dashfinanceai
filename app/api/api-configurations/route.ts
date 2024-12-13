@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const { type, url, numeroWhatsapp, token, senha, apiId } = parsed.data;
 
     // Criar uma nova configuração associada ao userId
-    const newConfig = await db.APIConfiguration.create({
+    const newConfig = await db.apiConfiguration.create({
       data: {
         userId,
         type,
@@ -70,7 +70,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const configuration = await db.APIConfiguration.findFirst({
+    const configuration = await db.apiConfiguration.findFirst({
       where: { userId },
     });
 
@@ -105,7 +105,7 @@ export async function PUT(request: Request) {
 
     // Se for uma atualização
     if (id) {
-      const updatedConfig = await db.APIConfiguration.update({
+      const updatedConfig = await db.apiConfiguration.update({
         where: { id },
         data: {
           type,
@@ -121,7 +121,7 @@ export async function PUT(request: Request) {
     }
 
     // Caso contrário, crie uma nova configuração
-    const newConfig = await db.APIConfiguration.create({
+    const newConfig = await db.apiConfiguration.create({
       data: {
         userId,
         type,
@@ -157,7 +157,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'ID não fornecido' }, { status: 400 });
     }
 
-    const configToDelete = await db.APIConfiguration.findUnique({
+    const configToDelete = await db.apiConfiguration.findUnique({
       where: { id },
     });
 
@@ -165,7 +165,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Configuração não encontrada ou não autorizada' }, { status: 404 });
     }
 
-    await db.APIConfiguration.delete({
+    await db.apiConfiguration.delete({
       where: { id },
     });
 

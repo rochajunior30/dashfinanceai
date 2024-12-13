@@ -74,6 +74,8 @@ model APIConfiguration {
   apiId         String?         // ID fornecido, apenas para API Oficial
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+
+  @@map("APIConfiguration")
 }
 
 enum APIType {

@@ -4,13 +4,24 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button } from "../../_components/ui/button";
 
+interface Config {
+    id: string;
+    userId: string;
+    type: string;
+    url: string;
+    numeroWhatsapp?: string;
+    token: string;
+    senha?: string | null;
+    apiId?: string | null;
+}
+
 const SettingsTable = () => {
-    const [configs, setConfigs] = useState<any>(null);
+    const [configs, setConfigs] = useState<Config | null>(null); // Alterado para aceitar um único objeto
     const [isLoading, setIsLoading] = useState(false);
-    const [userId, setUserID] = useState<string | undefined>();
-    const [qrCode, setQrCode] = useState<string | null>(null); // Para armazenar o QR Code gerado
+    const [qrCode, setQrCode] = useState<string | null>(null); // QR Code gerado
     const [isCheckingInstance, setIsCheckingInstance] = useState(false);
-    const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | null>(null);
+    type ConnectionStatus = "connected" | "disconnected" | "connecting" | null;
+    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(null);
 
     // Buscar configurações
     const fetchConfigs = async () => {
@@ -19,8 +30,11 @@ const SettingsTable = () => {
             const response = await fetch("/api/api-configurations");
             const data = await response.json();
 
-            setConfigs(data);
-            setUserID(data.userId);
+            if (data && data.id) {
+                setConfigs(data); // Armazena o objeto retornado
+            } else {
+                setConfigs(null); // Caso não haja configuração válida
+            }
         } catch (error) {
             toast.error("Erro ao carregar configurações.");
             console.error(error);
@@ -29,7 +43,7 @@ const SettingsTable = () => {
         }
     };
 
-    const checkInstance = async (config: any) => {
+    const checkInstance = async (config: Config) => {
         if (!config || config.type !== "API_EVOLUTION") return;
 
         setIsCheckingInstance(true);
@@ -57,10 +71,9 @@ const SettingsTable = () => {
                 setConnectionStatus("connected");
             }
             if (result?.instance?.base64) {
-                setConnectionStatus("conectando...");
+                setConnectionStatus("connecting");
                 setQrCode(result.instance.base64); // Atualizar o QR Code no estado
                 toast.success("QR-Code gerado com sucesso!");
-
             }
         } catch (error) {
             console.error("Erro ao verificar conexão da instância:", error);
@@ -70,7 +83,7 @@ const SettingsTable = () => {
         }
     };
 
-    const generateQRCode = async (config: any) => {
+    const generateQRCode = async (config: Config) => {
         try {
             const response = await fetch("/api/evo", {
                 method: "POST",
@@ -81,7 +94,7 @@ const SettingsTable = () => {
                     action: "generateQrCode",
                     url: config.url,
                     token: config.token,
-                    userId,
+                    userId: config.userId,
                 }),
             });
 
@@ -90,8 +103,6 @@ const SettingsTable = () => {
             }
 
             const result = await response.json();
-            console.log("QR-Code gerado:", result.qrcode);
-
             if (result.qrcode?.base64) {
                 setQrCode(result.qrcode.base64); // Atualizar o QR Code no estado
                 toast.success("QR-Code gerado com sucesso!");
@@ -104,7 +115,7 @@ const SettingsTable = () => {
         }
     };
 
-    const deleteInstance = async (config: any) => {
+    const deleteInstance = async (config: Config) => {
         try {
             const response = await fetch("/api/evo", {
                 method: "POST",
@@ -115,10 +126,9 @@ const SettingsTable = () => {
                     action: "deleteInstance",
                     url: config.url,
                     token: config.token,
-                    userId,
+                    userId: config.userId,
                 }),
             });
-            console.log(response);
 
             if (!response.ok) {
                 throw new Error("Erro ao deletar a instância.");
@@ -169,27 +179,28 @@ const SettingsTable = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr key={configs.id} className="text-center">
+                                <tr className="text-center">
                                     <td className="border border-gray-700 p-2">{configs.type}</td>
                                     <td className="border border-gray-700 p-2">{configs.url}</td>
-                                    <td className="border border-gray-700 p-2">{configs.token ? `****${configs.token.slice(-10)}` : ""}</td>
+                                    <td className="border border-gray-700 p-2">
+                                        {configs.token ? `****${configs.token.slice(-10)}` : ""}
+                                    </td>
                                     <td className="border border-gray-700 p-2 space-x-2">
                                         {configs.type === "API_EVOLUTION" ? (
                                             <div className="flex justify-between text-center space-x-2">
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => generateQRCode(configs)}
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => generateQRCode(configs)}
                                                 >
-                                                Gerar QR-Code
-                                            </Button>
-                                            <Button
-                                            variant="destructive"
-                                            onClick={() => deleteInstance(configs)}
-                                            >
-                                            Deletar
-                                        </Button>
+                                                    Gerar QR-Code
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    onClick={() => deleteInstance(configs)}
+                                                >
+                                                    Deletar
+                                                </Button>
                                             </div>
-                                            
                                         ) : (
                                             <Button
                                                 variant="outline"
@@ -209,18 +220,24 @@ const SettingsTable = () => {
                     {/* Exibir QR Code */}
                     {qrCode && (
                         <div className="mt-6 flex flex-col items-center">
-                            <h3 className="text-lg font-bold mb-4">Leia o QR Code com seu WhatsApp Business!</h3>
-                            <img src={qrCode} alt="QR Code" className="border border-gray-200 rounded-md" />
+                            <h3 className="text-lg font-bold mb-4">
+                                Leia o QR Code com seu WhatsApp Business!
+                            </h3>
+                            <img
+                                src={qrCode}
+                                alt="QR Code"
+                                className="border border-gray-200 rounded-md"
+                            />
                             <div className="mt-4 space-x-4">
                                 <Button
                                     variant="outline"
-                                    onClick={() => checkInstance(configs)}
+                                    onClick={() => configs && checkInstance(configs)}
                                 >
                                     Recriar QR Code
                                 </Button>
                                 <Button
                                     variant="destructive"
-                                    onClick={() => deleteInstance(configs)}
+                                    onClick={() => configs && deleteInstance(configs)}
                                 >
                                     Deletar Instância
                                 </Button>

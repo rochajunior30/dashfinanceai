@@ -5,58 +5,61 @@ import { z } from 'zod';
 
 // Esquema de validação
 const APIConfigSchema = z.object({
+  id: z.string().optional(),
   type: z.enum(["API_OFICIAL", "API_EVOLUTION", "N8N"]),
   url: z.string().url(),
   token: z.string(),
-  numeroWhatsapp: z.string().optional(),
+  numeroWhatsapp: z.string().nullable(),
   senha: z.string().optional(),
   apiId: z.string().optional(),
 });
 
 // POST: Criar ou atualizar configuração
 export async function POST(request: Request) {
-    try {
-      const { userId } = await auth();
-  
-      if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-  
-      const body = await request.json();
-      const parsed = APIConfigSchema.safeParse(body);
-  
-      if (!parsed.success) {
-        return NextResponse.json({ error: 'Invalid data', details: parsed.error.errors }, { status: 400 });
-      }
-  
-      const { type, url, numeroWhatsapp, token, senha, apiId } = parsed.data;
-  
-      // Criar uma nova configuração associada ao userId
-      const newConfig = await db.APIConfiguration.create({
-        data: {
-          userId,
-          type,
-          url,
-          numeroWhatsapp: type === "API_EVOLUTION" ? numeroWhatsapp : null,
-          token,
-          senha: type === "API_OFICIAL" ? senha : null,
-          apiId: type === "API_OFICIAL" ? apiId : null,
-        },
-      });
-  
-      return NextResponse.json(
-        { message: 'Configuração criada com sucesso!', config: newConfig },
-        { status: 201 }
-      );
-    } catch (error) {
-      console.error('Erro ao salvar configuração:', error);
-      return NextResponse.json(
-        { error: 'Internal Server Error', details: error.message },
-        { status: 500 }
-      );
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const body = await request.json();
+    const parsed = APIConfigSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid data', details: parsed.error.errors }, { status: 400 });
+    }
+
+    const { type, url, numeroWhatsapp, token, senha, apiId } = parsed.data;
+
+    // Criar uma nova configuração associada ao userId
+    const newConfig = await db.APIConfiguration.create({
+      data: {
+        userId,
+        type,
+        url,
+        numeroWhatsapp: type === "API_EVOLUTION" && numeroWhatsapp ? numeroWhatsapp : "",
+        token,
+        senha: type === "API_OFICIAL" ? senha : null,
+        apiId: type === "API_OFICIAL" ? apiId : null,
+      },
+    });
+
+    return NextResponse.json(
+      { message: 'Configuração criada com sucesso!', config: newConfig },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Erro ao salvar configuração:', error);
+
+    return NextResponse.json(
+      { error: 'Internal Server Error', details: (error as Error).message },
+      { status: 500 }
+    );
   }
-  
+
+}
+
 
 // GET: Obter configuração do usuário
 export async function GET() {
@@ -78,7 +81,7 @@ export async function GET() {
     return NextResponse.json(configuration, { status: 200 });
   } catch (error) {
     console.error('Erro ao buscar configuração:', error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error', details: (error as Error).message }, { status: 500 });
   }
 }
 
@@ -98,23 +101,43 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Invalid data', details: parsed.error.errors }, { status: 400 });
     }
 
-    const { id, type, url, token, senha, apiId } = parsed.data;
+    const { id, type, url, numeroWhatsapp, token, senha, apiId } = parsed.data;
 
-    const updatedConfig = await db.APIConfiguration.update({
-      where: { id },
+    // Se for uma atualização
+    if (id) {
+      const updatedConfig = await db.APIConfiguration.update({
+        where: { id },
+        data: {
+          type,
+          url,
+          numeroWhatsapp: type === "API_EVOLUTION" && numeroWhatsapp ? numeroWhatsapp : "",
+          token,
+          senha: type === "API_OFICIAL" ? senha : null,
+          apiId: type === "API_OFICIAL" ? apiId : null,
+        },
+      });
+
+      return NextResponse.json(updatedConfig);
+    }
+
+    // Caso contrário, crie uma nova configuração
+    const newConfig = await db.APIConfiguration.create({
       data: {
+        userId,
         type,
         url,
+        numeroWhatsapp: type === "API_EVOLUTION" && numeroWhatsapp ? numeroWhatsapp : "",
         token,
         senha: type === "API_OFICIAL" ? senha : null,
         apiId: type === "API_OFICIAL" ? apiId : null,
       },
     });
 
-    return NextResponse.json({ message: 'Configuração atualizada com sucesso!', config: updatedConfig }, { status: 200 });
+    return NextResponse.json(newConfig);
+
   } catch (error) {
     console.error('Erro ao atualizar configuração:', error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error', details: (error as Error).message }, { status: 500 });
   }
 }
 
@@ -142,13 +165,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Configuração não encontrada ou não autorizada' }, { status: 404 });
     }
 
-    await db.APIConfigurationn.delete({
+    await db.APIConfiguration.delete({
       where: { id },
     });
 
     return NextResponse.json({ message: 'Configuração removida com sucesso!' }, { status: 200 });
   } catch (error) {
     console.error('Erro ao deletar configuração:', error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error', details: (error as Error).message }, { status: 500 });
   }
 }

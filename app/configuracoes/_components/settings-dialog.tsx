@@ -17,9 +17,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { toast, ToastContainer } from "react-toastify"; // Biblioteca para notificações (instalar)
 import "react-toastify/dist/ReactToastify.css";
 
+// Tipo para os dados do formulário
+interface FormData {
+  url: string;
+  numeroWhatsapp: string;
+  token: string;
+  senha?: string; // Opcional
+  id?: string; // Opcional
+  apiId?: string; // Opcional
+}
+
+// Tipo para o payload enviado na requisição
+interface Payload extends FormData {
+  type: string | null;
+}
+
 const SettingsDialog = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<FormData>({
     url: "",
     numeroWhatsapp: "",
     token: "",
@@ -36,11 +51,10 @@ const SettingsDialog = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setIsSubmitting(true);
 
     try {
-      const payload: any = {
+      const payload: Payload = {
         type: selectedOption,
         url: formData.url,
         token: formData.token,
@@ -48,37 +62,37 @@ const SettingsDialog = () => {
       };
 
       if (selectedOption === "API_OFICIAL") {
-        payload.senha = formData.senha;
-        payload.apiId = formData.id;
+        payload.senha = formData.senha || "";
+        payload.apiId = formData.id || "";
       }
 
-      const response = await fetch('api/api-configurations', {
-        method: 'POST',
+      const response = await fetch("api/api-configurations", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        const errorText = await response.text(); // Leia o corpo como texto para investigar erros
+        const errorText = await response.text();
         throw new Error(`Erro: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      toast.success(data.message || 'Configurações salvas com sucesso!');
+      toast.success(data.message || "Configurações salvas com sucesso!");
 
       setIsOpen(false);
       setSelectedOption(null);
-      setFormData({ url: "", token: "", senha: "", id: "" });
-    } catch (error: any) {
-      console.error('Erro ao salvar as configurações:', error);
-      toast.error(error.message || 'Erro ao salvar as configurações.');
+      setFormData({ url: "", token: "", senha: "", id: "", numeroWhatsapp: "" });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido.";
+      console.error("Erro ao salvar as configurações:", error);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   const renderFormFields = () => {
     if (!selectedOption) return null;
@@ -204,7 +218,7 @@ const SettingsDialog = () => {
                     </Button>
                   </DialogClose>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Salvando...' : 'Salvar'}
+                    {isSubmitting ? "Salvando..." : "Salvar"}
                   </Button>
                 </DialogFooter>
               </form>

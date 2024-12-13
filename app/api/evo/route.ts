@@ -58,10 +58,10 @@ export async function POST(request: Request) {
 
         const result = await response.json();
         return NextResponse.json(result);
-    } catch (error: any) {
-        console.error("Error handling external request:", error.message);
+    } catch (error) {
+        console.error("Error handling external request:");
         return NextResponse.json(
-            { error: "Failed to process request", details: error.message },
+            { error: "Failed to process request", details: (error as Error).message },
             { status: 500 }
         );
     }

@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const SettingsForm = () => {
   const [selectedOption, setSelectedOption] = useState<string>("API Oficial");
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState({
     url: "",
     token: "",
     senha: "",
